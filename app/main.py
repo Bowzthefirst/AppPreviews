@@ -1,9 +1,9 @@
-# main.py
-
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
 from image_processing import overlay_screenshot_with_frame
 import config
+import base64
+from io import BytesIO
 
 def create_colored_background(width: int, height: int, color: tuple) -> Image.Image:
     return Image.new("RGBA", (width, height), color)
@@ -30,6 +30,12 @@ def place_on_background(downscaled_image: Image.Image, background: Image.Image, 
     draw.text(text_position, text, font=font, fill="white")
     
     return background
+
+def get_image_base64(img: Image.Image) -> str:
+    buffered = BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    return img_str
 
 st.title("Enhanced Screenshot Placement with Scaled and Centered Display")
 
@@ -61,11 +67,13 @@ if uploaded_images:
         
         final_image = place_on_background(downscaled_image, colored_background, padding, text_inputs[idx])
         
-        # Resize for display only and center-align
-        display_image = final_image.resize((400, int(400 * final_image.height / final_image.width)))  # 400px width
-        st.markdown(f"<p style='text-align: center;'><img src='data:image/png;base64,{st.image(display_image, output_format='PNG')}'></p>", unsafe_allow_html=True)
-
-        # Save and provide download for the original sized image
+        # Resize for display and encode to base64
+        display_image = final_image.resize((400, int(400 * final_image.height / final_image.width)))
+        img_str = get_image_base64(display_image)
+        
+        # Use base64 data in Markdown for direct embedding
+        st.markdown(f"<div style='text-align: center;'><img src='data:image/png;base64,{img_str}' width='400'/></div>", unsafe_allow_html=True)
+        
         output_path = f"final_image_{idx + 1}.png"
         final_image.save(output_path)
         
