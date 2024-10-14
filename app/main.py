@@ -17,14 +17,13 @@ def place_on_background(downscaled_image: Image.Image, background: Image.Image, 
     # Draw the text above the framed image
     draw = ImageDraw.Draw(background)
     font_size = 80  # Ensure this is large enough to see any effect
-    font_path = "assets/fonts/DejaVuSans-Bold.ttf"  # Adjust path if necessary
+    font_path = "assets/fonts/DejaVuSans-Bold.ttf"
     
     try:
-        # Load the custom font and verify its size
+        # Load the custom font
         font = ImageFont.truetype(font_path, font_size)
         st.write(f"Loaded font from: {font_path} with size: {font_size}")
     except IOError:
-        # Fall back to default font (non-resizable, for troubleshooting)
         st.write("Failed to load custom font, falling back to default.")
         font = ImageFont.load_default()
     
@@ -39,9 +38,7 @@ def place_on_background(downscaled_image: Image.Image, background: Image.Image, 
     
     return background
 
-
-
-st.title("Enhanced Screenshot Placement with Larger Text and More Spacing")
+st.title("Enhanced Screenshot Placement with Larger Image Scale")
 
 # Load the iPhone frame from the config path
 iphone_frame = Image.open(config.IPHONE_FRAME_PATH)
@@ -51,14 +48,14 @@ bg_color = st.color_picker("Choose a background color", "#000000")
 background_color = tuple(int(bg_color[i:i+2], 16) for i in (1, 3, 5)) + (255,)
 padding = st.slider("Select bottom padding", min_value=0, max_value=500, value=50)
 corner_radius = st.slider("Select corner radius for image", min_value=0, max_value=300, value=150)
-image_scale = st.slider("Adjust image scale", min_value=1000, max_value=1300, value=1100)
+# Increase the max value of the image scale slider to make the framed image larger
+image_scale = st.slider("Adjust image scale", min_value=1000, max_value=1400, value=1200)
 
 # Upload multiple screenshot images
 uploaded_images = st.file_uploader("Upload Screenshots", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 
 # Process each uploaded screenshot
 if uploaded_images:
-    # Collect text inputs for each image
     text_inputs = []
     for idx in range(len(uploaded_images)):
         text = st.text_input(f"Enter text for Image {idx + 1}", f"Sample Text {idx + 1}")
@@ -70,7 +67,7 @@ if uploaded_images:
         # Overlay the screenshot with the iPhone frame, using the chosen corner radius
         framed_image = overlay_screenshot_with_frame(input_image, iphone_frame, radius=corner_radius)
         
-        # Adjust the size of the image to be larger before placing on the background
+        # Adjust the size of the framed image based on the updated scale slider
         aspect_ratio = framed_image.height / framed_image.width
         downscaled_size = (image_scale, int(image_scale * aspect_ratio))
         downscaled_image = framed_image.resize(downscaled_size)
