@@ -9,15 +9,12 @@ def create_colored_background(width: int, height: int, color: tuple) -> Image.Im
     return Image.new("RGBA", (width, height), color)
 
 def place_on_background(downscaled_image: Image.Image, background: Image.Image, padding: int) -> Image.Image:
-    # Calculate the position to bottom-align the image on the background with padding
     position = ((background.width - downscaled_image.width) // 2, 
                 background.height - downscaled_image.height - padding)
-    
-    # Paste the downscaled image onto the background
     background.paste(downscaled_image, position, downscaled_image)
     return background
 
-st.title("Screenshot Placement on Custom Background with Padding")
+st.title("Enhanced Screenshot Placement with Adjustable Corners and Sizing")
 
 # Load the iPhone frame from the config path
 iphone_frame = Image.open(config.IPHONE_FRAME_PATH)
@@ -29,6 +26,10 @@ background_color = tuple(int(bg_color[i:i+2], 16) for i in (1, 3, 5)) + (255,)  
 # User selects padding for the bottom
 padding = st.slider("Select bottom padding", min_value=0, max_value=500, value=50)
 
+# User adjusts the corner radius and image scaling
+corner_radius = st.slider("Select corner radius for image", min_value=0, max_value=300, value=150)
+image_scale = st.slider("Adjust image scale", min_value=1000, max_value=1300, value=1100)
+
 # Upload multiple screenshot images
 uploaded_images = st.file_uploader("Upload Screenshots", type=["jpg", "jpeg", "png"], accept_multiple_files=True)
 
@@ -37,13 +38,12 @@ if uploaded_images:
     for idx, uploaded_image in enumerate(uploaded_images):
         input_image = Image.open(uploaded_image)
         
-        # Overlay the screenshot with the iPhone frame
-        framed_image = overlay_screenshot_with_frame(input_image, iphone_frame, radius=config.DEFAULT_CORNER_RADIUS)
+        # Overlay the screenshot with the iPhone frame, using the chosen corner radius
+        framed_image = overlay_screenshot_with_frame(input_image, iphone_frame, radius=corner_radius)
         
-        # Downscale the framed image to fit within the black background width
-        target_width = 1000  # Adjusted width for the iPhone framed image
+        # Adjust the size of the image to be larger before placing on the background
         aspect_ratio = framed_image.height / framed_image.width
-        downscaled_size = (target_width, int(target_width * aspect_ratio))
+        downscaled_size = (image_scale, int(image_scale * aspect_ratio))
         downscaled_image = framed_image.resize(downscaled_size)
         
         # Create a colored background of 1320px by 2868px
