@@ -16,12 +16,17 @@ def place_on_background(downscaled_image: Image.Image, background: Image.Image, 
     
     # Draw the text above the framed image
     draw = ImageDraw.Draw(background)
-    font_size = 80  # Target font size for large text
-    font_path = "assets/fonts/DejaVuSans-Bold.ttf"  # Adjust this path to where you saved the font file
+    font_size = 80  # Ensure this is large enough to see any effect
+    font_path = "assets/fonts/DejaVuSans-Bold.ttf"  # Adjust path if necessary
+    
     try:
+        # Load the custom font and verify its size
         font = ImageFont.truetype(font_path, font_size)
+        st.write(f"Loaded font from: {font_path} with size: {font_size}")
     except IOError:
-        font = ImageFont.load_default()  # If font loading fails, fallback to default font
+        # Fall back to default font (non-resizable, for troubleshooting)
+        st.write("Failed to load custom font, falling back to default.")
+        font = ImageFont.load_default()
     
     # Calculate text bounding box and center it horizontally with more spacing above the framed image
     text_bbox = draw.textbbox((0, 0), text, font=font)
@@ -33,6 +38,7 @@ def place_on_background(downscaled_image: Image.Image, background: Image.Image, 
     draw.text(text_position, text, font=font, fill="white")
     
     return background
+
 
 
 st.title("Enhanced Screenshot Placement with Larger Text and More Spacing")
